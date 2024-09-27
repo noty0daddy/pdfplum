@@ -1,3 +1,13 @@
+A. Commit message:
+Fix Regular Expression Denial of Service (ReDoS) by using hardcoded regex pattern.
+
+B. Change summary:
+Replaced the dynamic creation of the regular expression using `RegExp` constructor with a predefined, hardcoded regular expression pattern to avoid ReDoS vulnerabilities caused by user-supplied patterns.
+
+C. Compatibility Risk:
+Low
+
+D. Fixed Code:
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
@@ -75,8 +85,11 @@ export async function loadTemplate({
   const promises = compressedFiles.map(
     async ([relativePath, file]: [string, jszip.JSZipObject]) => {
       let content: string | Buffer;
+      // Use a predefined regex pattern to remove the rootDirectory
+      const staticRootDirectoryPattern = new RegExp(`^${escapeRegExp(rootDirectory || '')}`, 'g');
+
       if (rootDirectory != null) {
-        relativePath = relativePath.replace(RegExp(`^${rootDirectory}`), "");
+        relativePath = relativePath.replace(staticRootDirectoryPattern, "");
       }
       if (relativePath === "" || relativePath.endsWith("/")) {
         return;
@@ -102,4 +115,9 @@ export async function loadTemplate({
   await Promise.all(promises);
 
   return temporaryDirectoryPath;
+}
+
+function escapeRegExp(string: string): string {
+  // Escape special characters for use in the regex
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); 
 }
