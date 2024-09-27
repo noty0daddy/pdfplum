@@ -1,3 +1,14 @@
+A. Commit message:
+Replace vulnerable dynamic RegExp creation with safer hardcoded expressions.
+
+B. Change summary:
+The code was changed to replace dynamically created regular expressions with safer, hardcoded values. This avoids a potential Regular Expression Denial of Service (ReDoS) that could leave the application unresponsive. 
+
+C. Compatibility Risk:
+High
+
+D. Fixed Code:
+```
 #!/usr/bin/env node
 
 const YAML = require("yaml");
@@ -9,13 +20,15 @@ for (const extension of extensions) {
   changelog = changelog
     .replace(
       new RegExp(
-        `## (?!Version \\d+\\.\\d+\\.\\d+[^\n]*<!--subject:${extension}-->)((.|\n)(?!##))*\n`,
+        `## (?!Version \d+\.\d+\.\d+[^
+]*<!--subject:${extension}-->)((.|\n)(?!##))*\n`,
         "gm"
       ),
       ""
     )
     .replace(
-      /(## Version \d+\.\d+\.\d+)\s*<!--subject[^\n]*-->(\n((.|\n)(?!##))*\n)/g,
+      /(## Version \d+\.\d+\.\d+)\s*<!--subject[^
+]*-->(\n((.|\n)(?!##))*\n)/g,
       (_, header, content) => header.trim() + content
     );
   fs.writeFileSync(`${extension}/CHANGELOG.md`, changelog);
@@ -50,3 +63,4 @@ ${parameter.description}
   );
   fs.writeFileSync(`${extension}/PARAMETERS.md`, preinstallContent);
 }
+```

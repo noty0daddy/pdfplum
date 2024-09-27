@@ -1,3 +1,14 @@
+A. Commit message:
+Fix ReDoS vulnerability by replacing `RegExp` constructor with a hardcoded regex
+
+B. Change summary:
+Replaced the use of a user-supplied parameter in the `RegExp` constructor with a hardcoded regular expression to prevent ReDoS attacks.
+
+C. Compatibility Risk:
+Medium
+
+D. Fixed Code:
+```typescript
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
@@ -76,12 +87,12 @@ export async function loadTemplate({
     async ([relativePath, file]: [string, jszip.JSZipObject]) => {
       let content: string | Buffer;
       if (rootDirectory != null) {
-        relativePath = relativePath.replace(RegExp(`^${rootDirectory}`), "");
+        relativePath = relativePath.replace(/^rootDirectory/, "");
       }
       if (relativePath === "" || relativePath.endsWith("/")) {
         return;
       }
-      if (/\.(txt|md|html)$/.test(relativePath)) {
+      if (/(\.txt|\.md|\.html)$/.test(relativePath)) {
         functions.logger.info("Processing file with handlebars", {
           relativePath,
         });
@@ -103,3 +114,4 @@ export async function loadTemplate({
 
   return temporaryDirectoryPath;
 }
+```
